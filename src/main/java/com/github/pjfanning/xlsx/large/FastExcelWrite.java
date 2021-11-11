@@ -21,6 +21,7 @@ public class FastExcelWrite {
                 for (int c = 0; c < Common.COLUMN_COUNT; c++) {
                     ws.value(r, c, Common.generateValue(r, c));
                 }
+                ws.flush();
             }
             wb.finish();
             LOGGER.info("finished writing fast-excel {}", XLSX_FILENAME);

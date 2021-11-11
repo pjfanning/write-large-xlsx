@@ -13,10 +13,12 @@ import java.io.FileOutputStream;
 
 public class DeferredSxssfWrite {
     private static final Logger LOGGER = LoggerFactory.getLogger(DeferredSxssfWrite.class);
-    private static final String DEFERRED_SXSSF_FILENAME = "deferred-sxssf.xlsx";
+    private static final String DEFERRED_SXSSF_WITH_TEMP_FILENAME = "deferred-sxssf-with-temp-files.xlsx";
+    private static final String DEFERRED_SXSSF_WITHOUT_TEMP_FILENAME = "deferred-sxssf-without-temp-files.xlsx";
 
     public static void writeSxssf(boolean useTempFile) {
-        LOGGER.info("writing Deferred SXSSF useTempFile={}, {}", useTempFile, DEFERRED_SXSSF_FILENAME);
+        final String filename = useTempFile ? DEFERRED_SXSSF_WITH_TEMP_FILENAME : DEFERRED_SXSSF_WITHOUT_TEMP_FILENAME;
+        LOGGER.info("writing Deferred SXSSF {}", DEFERRED_SXSSF_WITH_TEMP_FILENAME);
         DeferredSXSSFWorkbook wb = new DeferredSXSSFWorkbook(10);
         try {
             DeferredSXSSFSheet sheet = wb.createSheet("large-sxssf");
@@ -29,17 +31,18 @@ public class DeferredSxssfWrite {
                     }
                 }
             });
-            try (FileOutputStream fos = new FileOutputStream(DEFERRED_SXSSF_FILENAME)) {
+            try (FileOutputStream fos = new FileOutputStream(filename)) {
                 if (useTempFile) {
                     wb.write(fos);
                 } else {
                     wb.writeAvoidingTempFiles(fos);
                 }
             }
-            LOGGER.info("finished writing Deferred SXSSF {}", DEFERRED_SXSSF_FILENAME);
+            LOGGER.info("finished writing Deferred SXSSF {}", filename);
         } catch (Throwable t) {
             LOGGER.error("failed to write Deferred SXSSF", t);
         } finally {
+            //with SXSSFWorkbook, you need to close and dispose it to get rid of all the related resources
             IOUtils.closeQuietly(wb);
             wb.dispose();
         }
@@ -63,6 +66,7 @@ public class DeferredSxssfWrite {
         } catch (Throwable t) {
             LOGGER.error("failed to init SXSSF", t);
         } finally {
+            //with SXSSFWorkbook, you need to close and dispose it to get rid of all the related resources
             IOUtils.closeQuietly(wb);
             wb.dispose();
         }
